@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Hollow House</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000;
+    color: #bbb;
+    font-family: Georgia, serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: default;
+  }
+  #story {
+    max-width: 600px;
+    padding: 20px;
+    text-align: center;
+    line-height: 1.6;
+    font-size: 1.2rem;
+    min-height: 120px;
+  }
+  #choices button {
+    display: block;
+    margin: 10px auto;
+    background: transparent;
+    color: #888;
+    border: 1px solid #333;
+    padding: 10px 20px;
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  #choices button:hover {
+    color: #d00;
+    border-color: #d00;
+  }
+  #flash {
+    position: fixed;
+    inset: 0;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.05s;
+  }
+  #flash.on { opacity: 0.85; }
+  #face {
+    position: fixed;
+    font-size: 12rem;
+    color: #600;
+    opacity: 0;
+    transition: opacity 0.1s;
+    pointer-events: none;
+  }
+  #face.on { opacity: 1; }
+  .shake { animation: shake 0.4s; }
+  @keyframes shake {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-8px, 4px); }
+    50% { transform: translate(6px, -6px); }
+    75% { transform: translate(-4px, 6px); }
+  }
+</style>
+</head>
+<body>
+  <div id="story"></div>
+  <div id="choices"></div>
+  <div id="flash"></div>
+  <div id="face">&#x1F480;</div>
+
+<script>
+  const story = document.getElementById('story');
+  const choicesEl = document.getElementById('choices');
+  const flash = document.getElementById('flash');
+  const face = document.getElementById('face');
+
+  const scenes = {
+    start: {
+      text: "You wake up on the cold floor of an empty house. The front door is open. Somewhere upstairs, a child is humming a lullaby you almost remember.",
+      choices: [
+        { label: "Go upstairs", next: "upstairs" },
+        { label: "Leave through the front door", next: "door" }
+      ]
+    },
+    door: {
+      text: "The porch is gone. Where the yard should be, there is only fog, and the fog is breathing.",
+      choices: [
+        { label: "Step into the fog", next: "fog" },
+        { label: "Go back inside", next: "start" }
+      ]
+    },
+    fog: {
+      text: "Something cold takes your hand. It is small, and it is pulling you down.",
+      choices: [ { label: "Let go", next: "jump" } ]
+    },
+    upstairs: {
+      text: "The hallway stretches longer than the house should allow. At the end, a door stands slightly open. The humming stops.",
+      choices: [
+        { label: "Open the door", next: "room" },
+        { label: "Call out", next: "call" }
+      ]
+    },
+    call: {
+      text: "Your voice echoes back, but it comes a half-second late, and it is not your voice.",
+      choices: [ { label: "Run to the door", next: "room" } ]
+    },
+    room: {
+      text: "A nursery. A rocking chair is moving slowly. In the crib, there is no baby, only a small pale face turned toward you, smiling.",
+      choices: [
+        { label: "Look closer", next: "jump" },
+        { label: "Slam the door and run", next: "start" }
+      ]
+    },
+    jump: {
+      text: "",
+      jumpscare: true,
+      choices: [ { label: "Play again", next: "start" } ]
+    }
+  };
+
+  function jumpscare() {
+    flash.classList.add('on');
+    face.classList.add('on');
+    document.body.classList.add('shake');
+    setTimeout(() => {
+      flash.classList.remove('on');
+      document.body.classList.remove('shake');
+    }, 150);
+    setTimeout(() => face.classList.remove('on'), 800);
+  }
+
+  function show(id) {
+    const scene = scenes[id];
+    story.textContent = scene.text;
+    choicesEl.innerHTML = '';
+    if (scene.jumpscare) jumpscare();
+    scene.choices.forEach(c => {
+      const btn = document.createElement('button');
+      btn.textContent = c.label;
+      btn.onclick = () => show(c.next);
+      choicesEl.appendChild(btn);
+    });
+  }
+
+  show('start');
+</script>
+</body>
+</html>
